@@ -1,4 +1,3 @@
-
 def path_is_clear(board, start_row, start_col, end_row, end_col):
     row_step = 0
     col_step = 0
@@ -31,11 +30,10 @@ def checkmate(board):
         return
 
     rows = board.splitlines()
-
-    if not rows:
-        return
-
     size = len(rows)
+
+    if size == 0:
+        return
 
     for row in rows:
         if len(row) != size:
@@ -60,50 +58,29 @@ def checkmate(board):
             piece = rows[row][col]
 
             if piece == "P":
-                if (
-                    king_row == row - 1
-                    and abs(king_col - col) == 1
-                ):
-                    print("Success")
-                    return
-
-            elif piece == "R":
-                same_row = row == king_row
-                same_col = col == king_col
-
-                if (same_row or same_col) and path_is_clear(
-                    rows, row, col, king_row, king_col
-                ):
+                if row - 1 == king_row and abs(col - king_col) == 1:
                     print("Success")
                     return
 
             elif piece == "B":
-                diagonal = (
-                    abs(row - king_row)
-                    == abs(col - king_col)
-                )
+                if abs(row - king_row) == abs(col - king_col):
+                    if path_is_clear(rows, row, col, king_row, king_col):
+                        print("Success")
+                        return
 
-                if diagonal and path_is_clear(
-                    rows, row, col, king_row, king_col
-                ):
-                    print("Success")
-                    return
+            elif piece == "R":
+                if row == king_row or col == king_col:
+                    if path_is_clear(rows, row, col, king_row, king_col):
+                        print("Success")
+                        return
 
             elif piece == "Q":
-                straight = (
-                    row == king_row
-                    or col == king_col
-                )
+                straight = row == king_row or col == king_col
+                diagonal = abs(row - king_row) == abs(col - king_col)
 
-                diagonal = (
-                    abs(row - king_row)
-                    == abs(col - king_col)
-                )
-
-                if (straight or diagonal) and path_is_clear(
-                    rows, row, col, king_row, king_col
-                ):
-                    print("Success")
-                    return
+                if straight or diagonal:
+                    if path_is_clear(rows, row, col, king_row, king_col):
+                        print("Success")
+                        return
 
     print("Fail")
