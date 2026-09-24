@@ -1,103 +1,109 @@
-#!/usr/bin/env python3
+
+def path_is_clear(board, start_row, start_col, end_row, end_col):
+    row_step = 0
+    col_step = 0
+
+    if end_row > start_row:
+        row_step = 1
+    elif end_row < start_row:
+        row_step = -1
+
+    if end_col > start_col:
+        col_step = 1
+    elif end_col < start_col:
+        col_step = -1
+
+    row = start_row + row_step
+    col = start_col + col_step
+
+    while row != end_row or col != end_col:
+        if board[row][col] in "PBRQK":
+            return False
+
+        row += row_step
+        col += col_step
+
+    return True
 
 
 def checkmate(board):
     if not isinstance(board, str):
-        print("Error: Invalid Board")
         return
 
     rows = board.splitlines()
 
-    while rows and rows[0] == "":
-        rows.pop(0)
-
-    while rows and rows[-1] == "":
-        rows.pop()
-
     if not rows:
-        print("Error: Wrong Dimension")
         return
 
     size = len(rows)
 
     for row in rows:
         if len(row) != size:
-            print("Error: Wrong Dimension")
             return
 
-    king_positions = []
+    king_row = -1
+    king_col = -1
+    king_count = 0
 
-    for row_index in range(size):
-        for column_index in range(size):
-            if rows[row_index][column_index] == "K":
-                king_positions.append((row_index, column_index))
+    for row in range(size):
+        for col in range(size):
+            if rows[row][col] == "K":
+                king_row = row
+                king_col = col
+                king_count += 1
 
-    if len(king_positions) != 1:
-        print("Error: K Unit -> Possible Number")
+    if king_count != 1:
         return
 
-    king_row, king_column = king_positions[0]
+    for row in range(size):
+        for col in range(size):
+            piece = rows[row][col]
 
-    pieces = "KQRBP"
-
-    # Pawn
-    pawn_row = king_row + 1
-
-    if pawn_row < size:
-        for pawn_column in (king_column - 1, king_column + 1):
-            if 0 <= pawn_column < size:
-                if rows[pawn_row][pawn_column] == "P":
+            if piece == "P":
+                if (
+                    king_row == row - 1
+                    and abs(king_col - col) == 1
+                ):
                     print("Success")
                     return
 
-    # Rook / Queen
-    straight_directions = [
-        (-1, 0),
-        (1, 0),
-        (0, -1),
-        (0, 1)
-    ]
+            elif piece == "R":
+                same_row = row == king_row
+                same_col = col == king_col
 
-    for row_move, column_move in straight_directions:
-        row = king_row + row_move
-        column = king_column + column_move
-
-        while 0 <= row < size and 0 <= column < size:
-            square = rows[row][column]
-
-            if square in pieces:
-                if square == "R" or square == "Q":
+                if (same_row or same_col) and path_is_clear(
+                    rows, row, col, king_row, king_col
+                ):
                     print("Success")
                     return
 
-                break
+            elif piece == "B":
+                diagonal = (
+                    abs(row - king_row)
+                    == abs(col - king_col)
+                )
 
-            row += row_move
-            column += column_move
-
-    # Bishop / Queen
-    diagonal_directions = [
-        (-1, -1),
-        (-1, 1),
-        (1, -1),
-        (1, 1)
-    ]
-
-    for row_move, column_move in diagonal_directions:
-        row = king_row + row_move
-        column = king_column + column_move
-
-        while 0 <= row < size and 0 <= column < size:
-            square = rows[row][column]
-
-            if square in pieces:
-                if square == "B" or square == "Q":
+                if diagonal and path_is_clear(
+                    rows, row, col, king_row, king_col
+                ):
                     print("Success")
                     return
 
-                break
+            elif piece == "Q":
+                straight = (
+                    row == king_row
+                    or col == king_col
+                )
 
-            row += row_move
-            column += column_move
+                diagonal = (
+                    abs(row - king_row)
+                    == abs(col - king_col)
+                )
+
+                if (straight or diagonal) and path_is_clear(
+                    rows, row, col, king_row, king_col
+                ):
+                    print("Success")
+                    return
 
     print("Fail")
